@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const jwt = require('jsonwebtoken');
 require("dotenv").config();
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const port = process.env.PORT || 5000;
@@ -16,6 +17,7 @@ async function run() {
     await client.connect();
     const partsCollection = client.db('laptop-menufecture').collection('parts');
     const orderCollection = client.db('laptop-menufecture').collection('order');
+    const userCollection = client.db('laptop-menufecture').collection('users');
     //server api
     app.get('/parts',async(req,res)=>{
         const query = {}; 
@@ -32,6 +34,20 @@ async function run() {
         res.send(parts);
     });
 
+    app.put('/user/:email', async (req, res) => {
+      const email = req.params.email;
+      const user = req.body;
+      const filter = { email: email };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: user,
+      };
+      const result = await userCollection.updateOne(filter, updateDoc, options);
+      const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' })
+      res.send({ result, token });
+
+    })
+
     app.get('/order', async(req, res)=>{
       // const query = {};
       // const order = orderCollection.find(query);
@@ -40,7 +56,7 @@ async function run() {
 
       const user = req.query.user;
       const query = {user: user};
-      console.log(query);
+      // console.log(query);
       const result = await orderCollection.find(query).toArray();
       console.log(result);
       res.send(result)
@@ -59,6 +75,8 @@ async function run() {
       const result = await orderCollection.insertOne(order);
       return res.send({success: true, result})
     })
+
+   
 
   } finally {
   }

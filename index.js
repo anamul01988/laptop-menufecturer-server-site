@@ -33,17 +33,17 @@ async function run() {
     });
 
     app.get('/order', async(req, res)=>{
-      const query = {};
-      const order = orderCollection.find(query);
-      const result = await order.toArray();
-      res.send(result)
-
-      // const user = req.query.user;
-      // const query = {user: user};
-      // console.log(query);
-      // const result = await orderCollection.find(query).toArray();
-      // console.log(result);
+      // const query = {};
+      // const order = orderCollection.find(query);
+      // const result = await order.toArray();
       // res.send(result)
+
+      const user = req.query.user;
+      const query = {user: user};
+      console.log(query);
+      const result = await orderCollection.find(query).toArray();
+      console.log(result);
+      res.send(result)
     })
 
     app.post('/order', async(req, res)=>{

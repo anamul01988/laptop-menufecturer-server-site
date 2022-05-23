@@ -15,6 +15,7 @@ async function run() {
   try {
     await client.connect();
     const partsCollection = client.db('laptop-menufecture').collection('parts');
+    const orderCollection = client.db('laptop-menufecture').collection('order');
     //server api
     app.get('/parts',async(req,res)=>{
         const query = {}; 
@@ -30,6 +31,20 @@ async function run() {
         const parts = await partsCollection.findOne(query);
         res.send(parts);
     });
+
+    app.post('/order', async(req, res)=>{
+      const order = req.body;
+      // console.log(order);
+      const query = {id: order.orderId, orderItem: order.order, user: order.user}
+      // console.log(query);
+      const exists = await orderCollection.findOne(query);
+      if(exists){
+        console.log('exists');
+        return res.send({success: false, order: exists})
+      }
+      const result = await orderCollection.insertOne(order);
+      return res.send({success: true, result})
+    })
 
   } finally {
   }

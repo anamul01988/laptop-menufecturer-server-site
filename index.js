@@ -39,6 +39,7 @@ async function run() {
     const partsCollection = client.db("laptop-menufecture").collection("parts");
     const orderCollection = client.db("laptop-menufecture").collection("order");
     const userCollection = client.db("laptop-menufecture").collection("users");
+    const profileCollection = client.db("laptop-menufecture").collection("profile");
     //server api
     app.get("/parts", async (req, res) => {
       const query = {};
@@ -133,6 +134,24 @@ async function run() {
       const result = await orderCollection.insertOne(order);
       return res.send({ success: true, result });
     });
+    
+    app.post('/profile', async(req, res)=>{
+      const profile = req.body;
+      console.log(profile);
+      const query = {
+        email: profile.user
+      }
+      console.log(query);
+      // const exists = await profileCollection.findOne(query)
+      const exists = await profileCollection.findOne(query);
+      if (exists) {
+        return res.send({ success: false, booking: exists });
+      }
+      const result = await profileCollection.insertOne(profile);
+      // console.log(result);
+      res.send({ success: true, result })
+    })
+
   } finally {
   }
 }

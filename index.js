@@ -40,6 +40,7 @@ async function run() {
     const orderCollection = client.db("laptop-menufecture").collection("order");
     const userCollection = client.db("laptop-menufecture").collection("users");
     const profileCollection = client.db("laptop-menufecture").collection("profile");
+    const reviewCollection = client.db("laptop-menufecture").collection("review");
     //server api
     app.get("/parts", async (req, res) => {
       const query = {};
@@ -151,6 +152,12 @@ async function run() {
       // console.log(result);
       res.send({ success: true, result })
     })
+
+    app.post("/review", verifyJWT, async (req, res) => {
+      const review = req.body;
+      const result = await reviewCollection.insertOne(review);
+      res.send(result);
+    });
 
   } finally {
   }

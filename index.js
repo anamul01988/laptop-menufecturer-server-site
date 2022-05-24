@@ -159,6 +159,11 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/review", verifyJWT, async (req, res) => {
+      const review = await reviewCollection.find().toArray();
+      res.send(review);
+    });
+
   } finally {
   }
 }

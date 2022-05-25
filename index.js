@@ -3,6 +3,7 @@ const cors = require("cors");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
+const { ObjectID } = require("bson");
 const port = process.env.PORT || 5000;
 const app = express();
 //middleware
@@ -42,6 +43,19 @@ async function run() {
     const profileCollection = client.db("laptop-menufecture").collection("profile");
     const reviewCollection = client.db("laptop-menufecture").collection("review");
     const productCollection = client.db("laptop-menufecture").collection("product");
+
+    // const verifyAdmin = async (req, res, next) => {
+    //   const requester = req.decoded.email;
+    //   const requesterAccount = await userCollection.findOne({
+    //     email: requester,
+    //   });
+    //   if (requesterAccount.role === "admin") {
+    //     next();
+    //   } else {
+    //     res.status(403).send({ message: "forbidden" });
+    //   }
+    // };
+
     //server api
     app.get("/parts", async (req, res) => {
       const query = {};
@@ -188,6 +202,20 @@ async function run() {
       const result = await productCollection.insertOne(product);
       res.send(result)
   })
+  app.get("/product", async (req, res) => {
+    const product = await productCollection.find().toArray();
+    res.send(product);
+     
+  });
+
+  app.delete("/product/:_id", async (req, res) => {
+    const _id = req.params._id;
+    console.log(_id);
+    const query = {_id: ObjectID(_id)};
+    const result = await productCollection.deleteOne(query);
+    console.log(result);
+    res.send(result);
+  });
 
   } finally {
   }

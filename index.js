@@ -41,6 +41,7 @@ async function run() {
     const userCollection = client.db("laptop-menufecture").collection("users");
     const profileCollection = client.db("laptop-menufecture").collection("profile");
     const reviewCollection = client.db("laptop-menufecture").collection("review");
+    const productCollection = client.db("laptop-menufecture").collection("product");
     //server api
     app.get("/parts", async (req, res) => {
       const query = {};
@@ -135,23 +136,40 @@ async function run() {
       const result = await orderCollection.insertOne(order);
       return res.send({ success: true, result });
     });
+
+
+
+
+
     
-    app.post('/profile', async(req, res)=>{
+    // app.post('/profile', async(req, res)=>{
+    //   const profile = req.body;
+    //   console.log(profile);
+    //   const query = {
+    //     email: profile.user
+    //   }
+    //   console.log(query);
+    //   const exists = await profileCollection.findOne(query);
+    //   if (exists) {
+    //     return res.send({ success: false, booking: exists });
+    //   }
+    //   const result = await profileCollection.insertOne(profile);
+    //   res.send({ success: true, result })
+    // })
+
+    app.put("/profile", async (req, res) => {
       const profile = req.body;
-      console.log(profile);
-      const query = {
-        email: profile.user
-      }
-      console.log(query);
-      // const exists = await profileCollection.findOne(query)
-      const exists = await profileCollection.findOne(query);
-      if (exists) {
-        return res.send({ success: false, booking: exists });
-      }
-      const result = await profileCollection.insertOne(profile);
-      // console.log(result);
-      res.send({ success: true, result })
-    })
+      const filter = { email: profile.user };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: profile,
+      };
+      const result = await profileCollection.updateOne(filter, updateDoc, options);
+      res.send( result);
+    });
+
+
+
 
     app.post("/review", verifyJWT, async (req, res) => {
       const review = req.body;
@@ -159,10 +177,17 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/review", verifyJWT, async (req, res) => {
+    app.get("/review", async (req, res) => {
       const review = await reviewCollection.find().toArray();
       res.send(review);
+       
     });
+
+    app.post('/product',async(req, res)=>{
+      const product = req.body;
+      const result = await productCollection.insertOne(product);
+      res.send(result)
+  })
 
   } finally {
   }

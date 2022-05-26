@@ -1,10 +1,13 @@
+
 const express = require("express");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
+// const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const stripe = require('stripe')('sk_test_51L0rfOBAAde9UJpJiJdJTfAVaC1D1zbukwLWDbE19Kan52s8BmFQIrH0K2h7hsUTY1SWHQ033jbv5bfJAp45luWR00QhxQ2g3h');
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const { ObjectID } = require("bson");
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+// const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -47,31 +50,33 @@ async function run() {
     const productCollection = client.db("laptop-menufecture").collection("product");
     const paymentCollection = client.db("laptop-menufecture").collection("payments");
 
-    // const verifyAdmin = async (req, res, next) => {
-    //   const requester = req.decoded.email;
-    //   const requesterAccount = await userCollection.findOne({
-    //     email: requester,
-    //   });
-    //   if (requesterAccount.role === "admin") {
-    //     next();
-    //   } else {
-    //     res.status(403).send({ message: "forbidden" });
-    //   }
-    // };
+    const verifyAdmin = async (req, res, next) => {
+      const requester = req.decoded.email;
+      const requesterAccount = await userCollection.findOne({
+        email: requester,
+      });
+      if (requesterAccount.role === "admin") {
+        next();
+      } else {
+        res.status(403).send({ message: "forbidden" });
+      }
+    };
 
-    app.post("/create-payment-intent", verifyJWT, async (req, res) => {
-      const order = req.body;
-      const price = order.price;
+    app.post("/create-payment-intent", verifyJWT, async(req, res) => {
+      const product_payment = req.body;
+      const price = parseInt(product_payment.price);
+      // console.log(price)
       const amount = price * 100;
+      // console.log(amount);
       const paymentIntent = await stripe.paymentIntents.create({
         amount: amount,
         currency: "usd",
         payment_method_types: ["card"],
-      });
-      res.send({
-        clientSecret: paymentIntent.client_secret,
-      });
-    });
+      })
+      res.send({clientSecret: paymentIntent.client_secret})
+    })
+
+   
 
     //server api
     app.get("/parts", async (req, res) => {
@@ -158,6 +163,27 @@ async function run() {
         orderItem: order.order,
         user: order.user,
       };
+
+      // app.delete("/order/:id", verifyJWT, async (req, res) => {
+      //   const id = req.params.id;
+      //   console.log(id);
+      //   const query = {_id: ObjectId(id)};
+      //   const result = await orderCollection.deleteOne(query);
+      //   console.log(result);
+      //   res.send(result);
+      // });
+
+      app.delete("/userOrder/:_id", async (req, res) => {
+        const _id = req.params._id;
+        console.log(_id);
+        const query = {_id: ObjectID(_id)};
+        const result = await orderCollection.deleteOne(query);
+        console.log(result);
+        res.send(result);
+      });
+
+
+
       // console.log(query);
       const exists = await orderCollection.findOne(query);
       if (exists) {
@@ -195,8 +221,6 @@ async function run() {
     });
 
 
-
-
     
     // app.post('/profile', async(req, res)=>{
     //   const profile = req.body;
@@ -209,18 +233,20 @@ async function run() {
     //   if (exists) {
     //     return res.send({ success: false, booking: exists });
     //   }
-    //   const result = await profileCollection.insertOne(profile);
+    //   const result = await userCollection.insertOne(profile);
     //   res.send({ success: true, result })
     // })
 
-    app.put("/profile", async (req, res) => {
+
+    app.put("/profileUpdate/:email", async (req, res) => {
+      const email = req.params.email;
+      const filter = { email: email };
       const profile = req.body;
-      const filter = { email: profile.user };
-      const options = { upsert: true };
+      // const options = { upsert: true };
       const updateDoc = {
         $set: profile,
       };
-      const result = await profileCollection.updateOne(filter, updateDoc, options);
+      const result = await userCollection.updateOne(filter, updateDoc);
       res.send( result);
     });
 

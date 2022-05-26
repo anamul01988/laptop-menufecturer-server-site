@@ -3,8 +3,8 @@ const express = require("express");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
-// const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-const stripe = require('stripe')('sk_test_51L0rfOBAAde9UJpJiJdJTfAVaC1D1zbukwLWDbE19Kan52s8BmFQIrH0K2h7hsUTY1SWHQ033jbv5bfJAp45luWR00QhxQ2g3h');
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+// const stripe = require('stripe')('sk_test_51L0rfOBAAde9UJpJiJdJTfAVaC1D1zbukwLWDbE19Kan52s8BmFQIrH0K2h7hsUTY1SWHQ033jbv5bfJAp45luWR00QhxQ2g3h');
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const { ObjectID } = require("bson");
 // const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
@@ -291,7 +291,7 @@ async function run() {
 run().catch(console.dir);
 
 app.get("/", (req, res) => {
-  res.send("Hello World!");
+  res.send("Hello Anamul!");
 });
 
 app.listen(port, () => {

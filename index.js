@@ -220,6 +220,13 @@ async function run() {
       res.send(updatedDoc);
     });
 
+    app.get("/getOrders", verifyJWT, verifyAdmin, async (req, res) => {
+      const query={};
+
+      const order = await orderCollection.find(query).toArray();
+      res.send(order);
+    });
+
 
     
     // app.post('/profile', async(req, res)=>{
